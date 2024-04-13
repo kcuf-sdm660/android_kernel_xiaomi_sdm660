@@ -515,7 +515,6 @@ static bool fg_sram_dump;
 #ifdef CONFIG_MACH_LONGCHEER
 int hwc_check_india;
 int hwc_check_global;
-extern bool is_poweroff_charge;
 #endif
 
 /* All getters HERE */
@@ -921,20 +920,6 @@ static int fg_get_batt_profile(struct fg_dev *fg)
 		pr_err("battery fastchg current unavailable, rc:%d\n", rc);
 		fg->bp.fastchg_curr_ma = -EINVAL;
 	}
-
-#ifdef CONFIG_MACH_LONGCHEER
-	if (hwc_check_global)
-		fg->bp.fastchg_curr_ma = 2300;
-#ifdef CONFIG_MACH_XIAOMI_TULIP
-	else
-		if (is_poweroff_charge) {
-			if (hwc_check_india)
-				fg->bp.fastchg_curr_ma = 2200;
-			else
-				fg->bp.fastchg_curr_ma = 2300;
-		}
-#endif
-#endif
 
 	rc = of_property_read_u32(profile_node, "qcom,fg-cc-cv-threshold-mv",
 			&fg->bp.vbatt_full_mv);
