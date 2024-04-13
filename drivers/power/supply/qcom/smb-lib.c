@@ -19,7 +19,6 @@
 #ifdef CONFIG_MACH_LONGCHEER
 #include "fg-core.h"
 
-extern int hwc_check_global;
 #ifdef CONFIG_MACH_XIAOMI_WHYRED
 #define LCT_JEITA_CCC_AUTO_ADJUST
 #endif
@@ -2295,19 +2294,6 @@ int smblib_set_prop_batt_status(struct smb_charger *chg,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_LONGCHEER
-#ifdef THERMAL_CONFIG_FB
-extern union power_supply_propval lct_therm_lvl_reserved;
-extern bool lct_backlight_off;
-extern int LctIsInCall;
-#ifdef CONFIG_MACH_XIAOMI_WAYNE
-extern int LctIsInVideo;
-#endif
-extern int LctThermal;
-extern int hwc_check_india;
-#endif
-#endif
-
 int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 				const union power_supply_propval *val)
 {
@@ -2320,68 +2306,7 @@ int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 	if (val->intval > chg->thermal_levels)
 		return -EINVAL;
 
-#ifdef CONFIG_MACH_LONGCHEER
-#ifdef THERMAL_CONFIG_FB
-	pr_err("smblib_set_prop_system_temp_level val=%d, chg->system_temp_level=%d, LctThermal=%d, lct_backlight_off= %d, IsInCall=%d, hwc_check_india=%d\n ",
-		val->intval,chg->system_temp_level, LctThermal, lct_backlight_off, LctIsInCall, hwc_check_india);
-
-	if (LctThermal == 0)
-#if defined(CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_LAVENDER)
-		if (val->intval < 6)
-#endif
-		lct_therm_lvl_reserved.intval = val->intval;
-#if defined(CONFIG_MACH_XIAOMI_WHYRED)
-		if (hwc_check_india) {
-			if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 2))
-				return 0;
-		} else {
-			if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 1))
-				return 0;
-		}
-#elif defined(CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_LAVENDER)
-	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 2))
-		return 0;
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 3))
-		return 0;
-#else
-	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 0) && (hwc_check_india == 0))
-	    return 0;
-	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 1) && (hwc_check_india == 1))
-	    return 0;
-#endif
-#if defined(CONFIG_MACH_XIAOMI_LAVENDER) || defined(CONFIG_MACH_XIAOMI_WHYRED) || defined(CONFIG_MACH_XIAOMI_WAYNE)
-	if ((LctIsInCall == 1) && (val->intval != 4))
-		return 0;
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-	if ((LctIsInCall == 1) && (val->intval != 5))
-		return 0;
-#endif
-#ifdef CONFIG_MACH_XIAOMI_WAYNE
-	if ((LctIsInVideo == 1) && (val->intval != 6) && (lct_backlight_off == 0) && (hwc_check_india == 1))
-		return 0;
-#endif
-	if (val->intval == chg->system_temp_level)
-		return 0;
-#endif
-#endif
-
 	chg->system_temp_level = val->intval;
-
-#ifdef CONFIG_MACH_LONGCHEER
-	if ((lct_backlight_off == 0) && (chg->system_temp_level <= 1))
-		vote(chg->pl_disable_votable, THERMAL_DAEMON_VOTER,false,0);
-#if defined(CONFIG_MACH_XIAOMI_WHYRED)
-	else if ((hwc_check_india == 0) && (chg->system_temp_level <= 2))
-		vote(chg->pl_disable_votable, THERMAL_DAEMON_VOTER,false,0);
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-	else if (chg->system_temp_level <= 2)
-		vote(chg->pl_disable_votable, THERMAL_DAEMON_VOTER,false,0);
-#endif
-	else
-	vote(chg->pl_disable_votable, THERMAL_DAEMON_VOTER,
-			chg->system_temp_level ? true : false, 0);
-#endif
 
 	if (chg->system_temp_level == chg->thermal_levels)
 		return vote(chg->chg_disable_votable,
@@ -4361,9 +4286,6 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
 #elif defined(CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_LAVENDER)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
-		if (hwc_check_global)
-			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2300000);
-		else
 			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 #else
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 3000000);

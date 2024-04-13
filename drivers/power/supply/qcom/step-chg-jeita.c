@@ -623,12 +623,6 @@ update_time:
 }
 
 #define JEITA_SUSPEND_HYST_UV		50000
-#ifdef CONFIG_MACH_XIAOMI_WAYNE
-extern union power_supply_propval lct_therm_lvl_reserved;
-extern int LctIsInVideo;
-extern int hwc_check_india;
-union power_supply_propval lct_therm_video_level = {6,};
-#endif
 static int handle_jeita(struct step_chg_info *chip)
 {
 	union power_supply_propval pval = {0, };
@@ -636,21 +630,6 @@ static int handle_jeita(struct step_chg_info *chip)
 	u64 elapsed_us;
 #ifdef CONFIG_MACH_LONGCHEER
 	int temp = 1;
-#endif
-
-#ifdef CONFIG_MACH_XIAOMI_WAYNE
-	if (hwc_check_india) {
-		pr_err("lct video LctIsInVideo=%d, lct_therm_lvl_reserved=%d\n",
-				LctIsInVideo, lct_therm_lvl_reserved.intval);
-		if (LctIsInVideo)
-			rc = power_supply_set_property(chip->batt_psy,
-					POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL,
-					&lct_therm_video_level);
-		else
-			rc = power_supply_set_property(chip->batt_psy,
-					POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL,
-					&lct_therm_lvl_reserved);
-	}
 #endif
 
 	rc = power_supply_get_property(chip->batt_psy,
