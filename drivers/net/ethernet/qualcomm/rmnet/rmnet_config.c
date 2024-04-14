@@ -479,7 +479,11 @@ nla_put_failure:
 
 struct rtnl_link_ops rmnet_link_ops __read_mostly = {
 	.kind		= "rmnet",
+<<<<<<< HEAD
 	.maxtype	= __IFLA_RMNET_EXT_MAX,
+=======
+	.maxtype	= IFLA_RMNET_MAX,
+>>>>>>> 7411aae5705c51b6b4cc26ddf1facd9413d4a026
 	.priv_size	= sizeof(struct rmnet_priv),
 	.setup		= rmnet_vnd_setup,
 	.validate	= rmnet_rtnl_validate,

@@ -19,8 +19,12 @@ static void init_codecs(struct venus_core *core)
 	struct venus_caps *caps = core->caps, *cap;
 	unsigned long bit;
 
+<<<<<<< HEAD
 	if (hweight_long(core->dec_codecs) +
 		hweight_long(core->enc_codecs) > MAX_CODEC_NUM)
+=======
+	if (hweight_long(core->dec_codecs) + hweight_long(core->enc_codecs) > MAX_CODEC_NUM)
+>>>>>>> 7411aae5705c51b6b4cc26ddf1facd9413d4a026
 		return;
 
 	for_each_set_bit(bit, &core->dec_codecs, MAX_CODEC_NUM) {
